@@ -733,6 +733,53 @@ const SidebarMenuSubButton = React.forwardRef<
 })
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton"
 
+// Componente SidebarNav adicionado para encapsular a lógica de navegação
+export interface SidebarNavItem {
+  title: string
+  icon: React.ElementType
+  section: string // Identificador da seção
+}
+
+export interface SidebarNavProps
+  extends React.ComponentProps<typeof SidebarMenu> {
+  navItems: SidebarNavItem[]
+  activeSection?: string
+  setActiveSection?: (section: string) => void
+}
+
+const SidebarNav = React.forwardRef<
+  React.ElementRef<typeof SidebarMenu>,
+  SidebarNavProps
+>(
+  (
+    { navItems, activeSection, setActiveSection, className, ...props },
+    ref
+  ) => {
+    const { state, isMobile } = useSidebar() // Para tooltips quando o sidebar está colapsado
+
+    return (
+      <SidebarMenu ref={ref} className={className} {...props}>
+        {navItems.map((item) => {
+          const IconComponent = item.icon
+          return (
+            <SidebarMenuItem key={item.section}>
+              <SidebarMenuButton
+                onClick={() => setActiveSection?.(item.section)}
+                isActive={activeSection === item.section}
+                tooltip={state === "collapsed" && !isMobile ? item.title : undefined}
+              >
+                <IconComponent />
+                <span>{item.title}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )
+        })}
+      </SidebarMenu>
+    )
+  }
+)
+SidebarNav.displayName = "SidebarNav"
+
 export {
   Sidebar,
   SidebarContent,
@@ -757,5 +804,8 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
+  SidebarNav, // Exportando o novo componente
+  type SidebarNavItem, // Exportando o tipo para uso externo
+  type SidebarNavProps, // Exportando o tipo para uso externo
   useSidebar,
 }

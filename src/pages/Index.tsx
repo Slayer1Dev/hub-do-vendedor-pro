@@ -1,11 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import Navigation from '../components/Navigation';
 import HeroFullScreen from '../components/HeroFullScreen';
 import ToolSection from '../components/ToolSection';
 import FeatureCards from '../components/FeatureCards';
 import Footer from '../components/Footer';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
+// A ferramenta "Gerador de EAN" foi removida desta lista.
 const tools = [
   {
     id: 'respostas',
@@ -15,15 +17,6 @@ const tools = [
     icon: 'chat',
     color: 'blue',
     mockup: 'chat-simulation'
-  },
-  {
-    id: 'ean',
-    title: 'Gerador de Códigos EAN',
-    description: 'Gere códigos EAN-13 válidos instantaneamente para seus produtos.',
-    details: 'Códigos únicos e válidos que passam em todas as verificações de marketplaces.',
-    icon: 'barcode',
-    color: 'green',
-    mockup: 'barcode-generation'
   },
   {
     id: 'lucro',
@@ -45,9 +38,9 @@ const tools = [
   },
   {
     id: 'estoque',
-    title: 'Estoque Compartilhado',
-    description: 'Sincronize estoque entre múltiplos anúncios e marketplaces em tempo real.',
-    details: 'Nunca mais venda o que não tem. Controle total do seu inventário.',
+    title: 'Gestão de Estoque para Mercado Livre',
+    description: 'Sincronize o estoque de múltiplos anúncios criando grupos.',
+    details: 'Vendeu em um anúncio? O Hub atualiza o estoque de todos os outros anúncios do grupo em tempo real. Nunca mais venda o que não tem.',
     icon: 'package',
     color: 'indigo',
     mockup: 'inventory-sync'
@@ -55,17 +48,12 @@ const tools = [
 ];
 
 const Index = () => {
-  const [scrollY, setScrollY] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      setScrollY(currentScrollY);
-      
-      // Calculate scroll progress
       const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = (currentScrollY / totalHeight) * 100;
+      const progress = (window.scrollY / totalHeight) * 100;
       setScrollProgress(Math.min(100, Math.max(0, progress)));
     };
 
@@ -74,8 +62,8 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
-      {/* Scroll Progress Bar */}
+    <div className="bg-background">
+      {/* Barra de Progresso de Rolagem */}
       <div className="fixed top-0 left-0 w-full h-1 bg-gray-100 z-50">
         <div 
           className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-300"
@@ -85,25 +73,21 @@ const Index = () => {
 
       <Navigation />
       
-      {/* Hero Full Screen */}
       <HeroFullScreen />
       
-      {/* Feature Cards Section */}
       <FeatureCards />
       
-      {/* Tool Sections */}
       <div className="relative">
         {tools.map((tool, index) => (
           <ToolSection 
             key={tool.id}
             tool={tool}
             index={index}
-            scrollY={scrollY}
           />
         ))}
       </div>
 
-      {/* CTA Final */}
+      {/* CTA Final CORRIGIDO */}
       <section className="py-20 md:py-28 bg-gradient-to-br from-blue-50/50 via-white to-indigo-50/30 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-blue-50/20"></div>
         <div className="max-w-4xl mx-auto text-center px-6 sm:px-8 lg:px-10 relative z-10">
@@ -119,17 +103,10 @@ const Index = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-8">
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-5 text-xl font-semibold rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
-              Ativar meu painel agora
-            </button>
-            <button className="border-2 border-blue-200 text-blue-600 hover:bg-blue-50 px-12 py-5 text-xl font-semibold rounded-3xl transition-all duration-300">
-              Ver Demonstração
-            </button>
+            <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-5 text-xl font-semibold rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                <Link to="/register">Ativar meu painel agora</Link>
+            </Button>
           </div>
-          
-          <p className="text-blue-600/70 text-sm">
-            Teste grátis por 7 dias • Sem cartão de crédito • Suporte 24/7
-          </p>
         </div>
       </section>
 
