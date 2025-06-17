@@ -39,7 +39,7 @@ function CreateGroupDialog({ onGroupCreated }) {
   const { getToken } = useAuth();
   
   const mutation = useMutation({
-    mutationFn: (newGroup: FormValues) => createStockGroup(newGroup, getToken),
+    mutationFn: async (newGroup: FormValues) => createStockGroup(newGroup, await getToken()),
     onSuccess: () => {
       toast.success("Grupo criado com sucesso!");
       onGroupCreated(); // Chama a função do pai para fechar o dialog e atualizar a lista

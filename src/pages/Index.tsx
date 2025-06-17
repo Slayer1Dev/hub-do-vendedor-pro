@@ -1,5 +1,5 @@
 import HeroFullScreen from '../components/HeroFullScreen';
-import ToolSection from '../components/ToolSection';
+import ToolSection from '../components/ToolSection'; // Ensure this path is correct and the component exists
 import FeatureCards from '../components/FeatureCards';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -51,9 +51,10 @@ const Index = () => {
       <div className="relative">
         {tools.map((tool, index) => (
           <ToolSection 
-            key={tool.id}
+            key={`${tool.id}-${index}`}
             tool={tool}
             index={index}
+            scrollY={window.scrollY} // Pass the scrollY value
           />
         ))}
       </div>

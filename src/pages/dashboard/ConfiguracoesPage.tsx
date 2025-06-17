@@ -56,8 +56,8 @@ const ConnectionsCard = () => {
     const appId = import.meta.env.VITE_MERCADOLIVRE_APP_ID;
     const redirectUri = import.meta.env.VITE_MERCADOLIVRE_REDIRECT_URI;
     
-    // CORREÇÃO APLICADA AQUI: Adicionando o escopo 'offline_access'
-    const authUrl = `https://auth.mercadolibre.com/authorization?response_type=code&client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=offline_access&code_challenge=${challenge}&code_challenge_method=S256`;
+    // Adicionando os escopos 'read' e 'offline_access' (espaço codificado como %20)
+    const authUrl = `https://auth.mercadolibre.com/authorization?response_type=code&client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=read%20offline_access&code_challenge=${challenge}&code_challenge_method=S256`;
     
     window.location.href = authUrl;
   };

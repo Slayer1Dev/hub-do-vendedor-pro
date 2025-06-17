@@ -84,6 +84,10 @@ export async function makeMlApiRequest(userId: string, endpoint: string, options
     return response.data;
   } catch (error) {
     console.error(`Erro na chamada à API do ML para o endpoint ${endpoint}:`, error.response?.data || error);
-    throw new Error(`Falha na comunicação com a API do Mercado Livre.`);
+    // Re-throw the original error if it's an AxiosError, otherwise throw a new Error
+    if (axios.isAxiosError(error)) {
+        throw error; // Relança o erro original do Axios
+    }
+    throw new Error(`Falha na comunicação com a API do Mercado Livre.`); // Lança um erro genérico para outros tipos de erro
   }
 }

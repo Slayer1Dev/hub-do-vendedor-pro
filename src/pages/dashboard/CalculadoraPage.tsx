@@ -38,10 +38,10 @@ export default function CalculadoraLucroPage() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      custo: "",
-      frete: "",
-      outrosCustos: "",
-      lucroDesejado: "",
+      custo: 0,
+      frete: 0,
+      outrosCustos: 0,
+      lucroDesejado: 0,
       tipoAnuncioML: "premium",
       categoria: null,
     },

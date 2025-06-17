@@ -1,13 +1,10 @@
-// 1. A URL do backend foi removida. As chamadas agora usarão caminhos relativos.
-// const API_URL = 'http://localhost:3333';
-
-// Helper genérico para chamadas autenticadas
+// Helper genérico para chamadas autenticadas (sua função original, sem alterações)
 async function fetchAuthenticated(
-    url: string, // Agora receberá um caminho como '/api/dashboard/stats'
+    url: string,
     token: string,
     options: RequestInit = {}
   ) {
-    const response = await fetch(url, { // 2. A chamada é feita para um caminho relativo
+    const response = await fetch(url, {
       ...options,
       headers: {
         ...options.headers,
@@ -18,87 +15,75 @@ async function fetchAuthenticated(
   
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      // Lançando um erro que pode ser capturado pelo componente
       throw new Error(errorData.error || `Falha na requisição: ${response.statusText}`);
     }
   
+    // Retorna a resposta em JSON se a requisição for bem-sucedida
     return response.json();
   }
   
-  
-  // --- Funções da API ---
-  
-  export const fetchDashboardStats = async (getToken: () => Promise<string | null>) => {
-    const token = await getToken();
-    if (!token) throw new Error("Não autenticado");
-    return fetchAuthenticated(`/api/dashboard/stats`, token);
-  };
-  
-  export const getAiSettings = async (getToken: () => Promise<string | null>) => {
+  // --- CORREÇÃO PRINCIPAL ---
+  // Criamos e exportamos o objeto 'api' que os seus componentes estão tentando importar.
+  export const api = {
+    // O método 'get' do nosso objeto 'api'
+    get: async <T>(url: string, getToken: () => Promise<string | null>): Promise<T> => {
       const token = await getToken();
       if (!token) throw new Error("Não autenticado");
-      return fetchAuthenticated(`/api/settings/ai`, token);
-  };
+      return fetchAuthenticated(url, token);
+    },
   
-  export const updateAiSettings = async (
-      settings: any,
-      getToken: () => Promise<string | null>
-  ) => {
+    // O método 'post' do nosso objeto 'api'
+    post: async <T>(url: string, data: any, getToken: () => Promise<string | null>): Promise<T> => {
       const token = await getToken();
       if (!token) throw new Error("Não autenticado");
-      return fetchAuthenticated(`/api/settings/ai`, token, {
-          method: 'POST',
-          body: JSON.stringify(settings),
-      });
-  };
-  
-  export const calculatePricing = async (
-      formData: any,
-      getToken: () => Promise<string | null>
-  ) => {
-      const token = await getToken();
-      if (!token) throw new Error("Não autenticado");
-      return fetchAuthenticated(`/api/pricing/calculate`, token, {
-          method: 'POST',
-          body: JSON.stringify(formData),
-      });
-  };
-  
-  export const getStockGroups = async (getToken: () => Promise<string | null>) => {
-      const token = await getToken();
-      if (!token) throw new Error("Não autenticado");
-      return fetchAuthenticated(`/api/stock/groups`, token);
-  };
-  
-  export const createStockGroup = async (
-      groupData: { groupName: string, announcementIds: string[] },
-      getToken: () => Promise<string | null>
-  ) => {
-      const token = await getToken();
-      if (!token) throw new Error("Não autenticado");
-      return fetchAuthenticated(`/api/stock/groups`, token, {
-          method: 'POST',
-          body: JSON.stringify(groupData),
-      });
-  };
-
-// ... (outras funções da api) ...
-
-export const checkConnectionStatus = async (getToken: () => Promise<string | null>) => {
-    const token = await getToken();
-    if (!token) throw new Error("Não autenticado");
-    return fetchAuthenticated(`/api/connections`, token);
-};
-
-export const connectMercadoLivreAccount = async (
-    // Agora recebe um objeto com o código e o verifier
-    data: { code: string, verifier: string },
-    getToken: () => Promise<string | null>
-) => {
-    const token = await getToken();
-    if (!token) throw new Error("Não autenticado");
-    return fetchAuthenticated(`/api/connections/mercadolivre`, token, {
+      return fetchAuthenticated(url, token, {
         method: 'POST',
-        // Envia ambos no corpo da requisição
         body: JSON.stringify(data),
-    });
-};
+      });
+    },
+    
+    // Você pode adicionar outros métodos como 'put', 'delete' aqui se precisar
+    // put: async (...) => { ... },
+    // delete: async (...) => { ... },
+  };
+  
+  // --- FUNÇÕES ANTIGAS (OPCIONAL) ---
+  // Com a criação do objeto 'api' acima, as funções abaixo se tornam redundantes.
+  // Os componentes agora podem chamar 'api.get' ou 'api.post' diretamente.
+  // Recomendo remover as funções abaixo e ajustar os componentes para usar o novo objeto 'api'.
+  // Manterei algumas aqui como exemplo de como ficariam.
+  
+  export const fetchDashboardStats = (getToken: () => Promise<string | null>) => {
+    return api.get('/api/dashboard/stats', getToken);
+  };
+  
+  export const getAiSettings = (getToken: () => Promise<string | null>) => {
+    return api.get('/api/settings/ai', getToken);
+  };
+  
+  export const updateAiSettings = (settings: any, getToken: () => Promise<string | null>) => {
+    return api.post('/api/settings/ai', settings, getToken);
+  };
+  
+  export const calculatePricing = (data: any, getToken: () => Promise<string | null>) => {
+    return api.post('/api/pricing/calculate', data, getToken); // Ajuste o endpoint se necessário
+  };
+  
+  export const getStockGroups = (getToken: () => Promise<string | null>) => {
+    return api.get('/api/stock/groups', getToken);
+  };
+  
+  export const createStockGroup = (data: { groupName: string; announcementIds: string[] }, getToken: () => Promise<string | null>) => {
+    return api.post('/api/stock/groups', data, getToken);
+  };
+  
+  export const checkConnectionStatus = (getToken: () => Promise<string | null>) => {
+    return api.get('/api/connections', getToken);
+  };
+  
+  export const connectMercadoLivreAccount = (data: { code: string, verifier: string }, getToken: () => Promise<string | null>) => {
+    return api.post('/api/connections/mercadolivre', data, getToken);
+  };
+  
+  // E assim por diante para todas as outras...

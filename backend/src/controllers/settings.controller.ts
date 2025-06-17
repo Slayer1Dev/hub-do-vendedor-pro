@@ -38,7 +38,7 @@ export const getAiSettings = async (req: AuthenticatedRequest, res: Response) =>
 // Controller para atualizar as configurações
 export const updateAiSettings = async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.auth?.userId;
-  const { tone, signature, autoMode, knowledgeItems } = req.body;
+  const { tone, signature, autoMode, knowledgeItems }: { tone?: string; signature?: string; autoMode?: boolean; knowledgeItems?: { title: string; content: string }[] } = req.body;
 
   if (!userId) {
     return res.status(401).json({ error: 'Não autorizado' });

@@ -15,8 +15,8 @@ import AuthLayout from "./pages/auth/AuthLayout"; // <-- Importa o novo layout d
 import IndexPage from "./pages/Index";
 import PrecosPage from "./pages/PrecosPage";
 import NotFound from "./pages/NotFound";
-import DashboardPage from "./pages/dashboard/DashboardPage";
-import RespostasPage from "./pages/dashboard/RespostasPage";
+import { DashboardPage } from "./pages/dashboard/DashboardPage";
+import { RespostasPage } from "./pages/dashboard/RespostasPage";
 import CalculadoraPage from "./pages/dashboard/CalculadoraPage";
 import ControleEstoquePage from "./pages/dashboard/ControleEstoquePage";
 import ConfiguracoesPage from "./pages/dashboard/ConfiguracoesPage";
