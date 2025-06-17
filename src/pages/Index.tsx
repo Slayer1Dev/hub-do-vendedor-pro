@@ -1,13 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import Navigation from '../components/Navigation';
 import HeroFullScreen from '../components/HeroFullScreen';
 import ToolSection from '../components/ToolSection';
 import FeatureCards from '../components/FeatureCards';
-import Footer from '../components/Footer';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
-// A ferramenta "Gerador de EAN" foi removida desta lista.
 const tools = [
   {
     id: 'respostas',
@@ -48,35 +44,10 @@ const tools = [
 ];
 
 const Index = () => {
-  const [scrollProgress, setScrollProgress] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = (window.scrollY / totalHeight) * 100;
-      setScrollProgress(Math.min(100, Math.max(0, progress)));
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   return (
-    <div className="bg-background">
-      {/* Barra de Progresso de Rolagem */}
-      <div className="fixed top-0 left-0 w-full h-1 bg-gray-100 z-50">
-        <div 
-          className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-300"
-          style={{ width: `${scrollProgress}%` }}
-        />
-      </div>
-
-      <Navigation />
-      
+    <>
       <HeroFullScreen />
-      
       <FeatureCards />
-      
       <div className="relative">
         {tools.map((tool, index) => (
           <ToolSection 
@@ -86,8 +57,6 @@ const Index = () => {
           />
         ))}
       </div>
-
-      {/* CTA Final CORRIGIDO */}
       <section className="py-20 md:py-28 bg-gradient-to-br from-blue-50/50 via-white to-indigo-50/30 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-blue-50/20"></div>
         <div className="max-w-4xl mx-auto text-center px-6 sm:px-8 lg:px-10 relative z-10">
@@ -101,7 +70,6 @@ const Index = () => {
               Junte-se a milhares de vendedores que já aumentaram seus lucros com nossas ferramentas inteligentes
             </p>
           </div>
-          
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-8">
             <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white px-12 py-5 text-xl font-semibold rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
                 <Link to="/register">Ativar meu painel agora</Link>
@@ -109,9 +77,7 @@ const Index = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
-    </div>
+    </>
   );
 };
 

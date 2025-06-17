@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Bloco que estava faltando. Ele informa ao Prisma para usar o PostgreSQL
+// e pegar a URL de conexão do nosso arquivo .env
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo para armazenar os dados dos usuários, sincronizados com o Clerk
+model User {
+  id                  String                @id @unique // ID do Clerk (ex: "user_2hA3B...")
+  email               String                @unique
+  name                String?
+  avatarUrl           String?
+  planId              Int?
+  planExpiresAt       DateTime?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  plan                Plan?                 @relation(fields: [planId], references: [id])
+  mercadoLivreAccount MercadoLivreAccount?
+  knowledgeBaseItems  KnowledgeBaseItem[]
+  stockGroups         StockGroup[]
+}
+
+// Modelo para gerenciar os planos de assinatura
+model Plan {
+  id       Int      @id @default(autoincrement())
+  name     String   @unique // Ex: "Pro", "Enterprise"
+  price    Decimal  @db.Decimal(10, 2)
+  features Json
+  users    User[]
+}
+
+// Modelo para armazenar as conexões de um usuário com o Mercado Livre
+model MercadoLivreAccount {
+  id           Int        @id @default(autoincrement())
+  userId       String     @unique
+  user         User       @relation(fields: [userId], references: [id])
+  mlUserId     String
+  accessToken  String // Deverá ser criptografado na aplicação
+  refreshToken String? // Deverá ser criptografado na aplicação
+  expiresAt    DateTime
+  createdAt    DateTime   @default(now())
+  questions    Question[]
+}
+
+// Modelo para a Base de Conhecimento da IA
+model KnowledgeBaseItem {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+}
+
+// Modelo para as perguntas recebidas
+model Question {
+  id            Int                 @id @default(autoincrement())
+  mlAccountId   Int
+  mlAccount     MercadoLivreAccount @relation(fields: [mlAccountId], references: [id])
+  mlQuestionId  String              @unique
+  product       String?
+  question      String
+  buyer         String?
+  status        String              @default("pending") // 'pending', 'answered', 'human_review'
+  aiResponse    String?
+  finalAnswer   String?
+  askedAt       DateTime
+}
+
+// Modelo para os grupos de estoque
+model StockGroup {
+  id                   Int                   @id @default(autoincrement())
+  userId               String
+  user                 User                  @relation(fields: [userId], references: [id])
+  name                 String
+  stock                Int                   @default(0)
+  groupedAnnouncements GroupedAnnouncement[]
+}
+
+// Modelo de ligação para os anúncios em um grupo
+model GroupedAnnouncement {
+  id                 Int        @id @default(autoincrement())
+  stockGroupId       Int
+  stockGroup         StockGroup @relation(fields: [stockGroupId], references: [id])
+  mlAnnouncementId   String // Ex: "MLB12345678"
+}

@@ -1,0 +1,17 @@
+# Dependências
+/node_modules
+
+# Arquivos de Build
+/dist
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Variáveis de Ambiente
+.env
+
+# Arquivos de Sistema
+.DS_Store

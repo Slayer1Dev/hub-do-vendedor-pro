@@ -1,85 +1,83 @@
-import React from 'react';
+import { useAuth } from '@clerk/clerk-react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchDashboardStats } from '@/lib/api';
 import { TrendingUp, MessageSquare, Package, DollarSign, Eye, Clock } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Terminal } from "lucide-react"
 
-const DashboardMain = () => {
-  const stats = [
-    { label: 'Perguntas hoje', value: '23', change: '+12%', icon: MessageSquare, color: 'blue' },
-    { label: 'Estoque total', value: '1.247', change: '+3%', icon: Package, color: 'green' },
-    { label: 'Lucro estimado', value: 'R$ 8.430', change: '+18%', icon: DollarSign, color: 'purple' },
-    { label: 'Visualizações', value: '15.2k', change: '+25%', icon: Eye, color: 'orange' },
-  ];
+// Componente para o esqueleto de carregamento (sem alterações)
+const StatCardSkeleton = () => (
+  <div className="p-6 rounded-2xl border bg-card">
+    <div className="flex items-center justify-between mb-4"><Skeleton className="w-10 h-10 rounded-xl" /><Skeleton className="h-4 w-12" /></div>
+    <div><Skeleton className="h-8 w-24 mb-1" /><Skeleton className="h-4 w-32" /></div>
+  </div>
+);
 
-  const recentActivities = [
-    { action: 'Pergunta respondida automaticamente', product: 'iPhone 13 Pro Max', time: '5 min atrás' },
-    { action: 'Estoque atualizado', product: 'Samsung Galaxy S23', time: '12 min atrás' },
-    { action: 'Anúncio otimizado', product: 'MacBook Air M2', time: '1h atrás' },
-    { action: 'Nova avaliação recebida', product: 'Fone de Ouvido Bluetooth', time: '3h atrás' },
-  ];
+// Componente do card de estatísticas (sem alterações)
+const StatCard = ({ icon: Icon, label, value, change, color }) => (
+  <div className="bg-card p-6 rounded-2xl border border-border hover:shadow-lg transition-shadow duration-200">
+    <div className="flex items-center justify-between mb-4"><div className={`w-10 h-10 rounded-xl bg-${color}-500/10 flex items-center justify-center`}><Icon className={`w-5 h-5 text-${color}-500`} /></div><span className={`text-sm font-medium ${change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>{change}</span></div>
+    <div><p className="text-2xl font-bold text-foreground mb-1">{value}</p><p className="text-sm text-muted-foreground">{label}</p></div>
+  </div>
+);
+
+export default function DashboardPage() {
+  const { getToken } = useAuth();
+  
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['dashboardStats'],
+    queryFn: () => fetchDashboardStats(getToken),
+  });
+
+  // --- LÓGICA DE RENDERIZAÇÃO ATUALIZADA ---
+
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatCardSkeleton /><StatCardSkeleton /><StatCardSkeleton /><StatCardSkeleton />
+        </div>
+      );
+    }
+
+    if (isError) {
+      return (
+        <Alert variant="destructive">
+          <Terminal className="h-4 w-4" />
+          <AlertTitle>Erro ao Carregar Dados</AlertTitle>
+          <AlertDescription>{error.message}</AlertDescription>
+        </Alert>
+      );
+    }
+    
+    if (data) {
+        const stats = [
+            { label: 'Perguntas hoje', value: data.stats.perguntasHoje, change: '+12%', icon: MessageSquare, color: 'blue' },
+            { label: 'Total de Vendas', value: data.stats.estoqueTotal, change: '+3%', icon: Package, color: 'green' },
+            { label: 'Lucro estimado', value: data.stats.lucroEstimado, change: '+18%', icon: DollarSign, color: 'purple' },
+            { label: 'Visualizações', value: data.stats.visualizacoes, change: '+25%', icon: Eye, color: 'orange' },
+        ];
+
+      return (
+        <div className="space-y-6">
+          <h1 className="text-2xl font-bold">{data.message}</h1>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {stats.map((stat, index) => (
+              <StatCard key={index} {...stat} />
+            ))}
+          </div>
+        </div>
+      );
+    }
+    
+    return null; // Caso não haja dados e não esteja carregando ou com erro
+  };
 
   return (
     <div className="space-y-8">
-      {/* Cards de estatísticas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <div key={index} className="bg-card p-6 rounded-2xl border border-border hover:shadow-lg transition-shadow duration-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`w-10 h-10 rounded-xl bg-${stat.color}-500/10 flex items-center justify-center`}>
-                <stat.icon className={`w-5 h-5 text-${stat.color}-500`} />
-              </div>
-              <span className={`text-sm font-medium ${stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
-                {stat.change}
-              </span>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-foreground mb-1">{stat.value}</p>
-              <p className="text-sm text-muted-foreground">{stat.label}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Atividade Recente e Produtos em Destaque */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-card p-6 rounded-2xl border border-border">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Atividade Recente</h3>
-          <div className="space-y-4">
-            {recentActivities.map((activity, index) => (
-              <div key={index} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted transition-colors">
-                <div className="w-2 h-2 bg-primary rounded-full"></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-foreground">{activity.action}</p>
-                  <p className="text-xs text-muted-foreground">{activity.product}</p>
-                </div>
-                <div className="flex items-center text-xs text-muted-foreground">
-                  <Clock className="w-3 h-3 mr-1" />
-                  {activity.time}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-card p-6 rounded-2xl border border-border">
-          <h3 className="text-lg font-semibold text-foreground mb-4">Produtos em Destaque</h3>
-          <div className="space-y-4">
-            {[
-              { name: 'iPhone 13 Pro Max 256GB', sales: 45, revenue: 'R$ 67.500' },
-              { name: 'Samsung Galaxy S23 Ultra', sales: 32, revenue: 'R$ 38.400' },
-              { name: 'MacBook Air M2', sales: 18, revenue: 'R$ 25.200' },
-            ].map((product, index) => (
-              <div key={index} className="p-4 rounded-lg border border-border hover:border-primary/20 transition-colors">
-                <h4 className="font-medium text-foreground mb-2">{product.name}</h4>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{product.sales} vendas</span>
-                  <span className="font-semibold text-green-600">{product.revenue}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      {renderContent()}
+      {/* Aqui você pode adicionar outras seções do dashboard que não dependem desses dados */}
     </div>
   );
 };
-
-export default DashboardMain;
